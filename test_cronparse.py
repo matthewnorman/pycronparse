@@ -50,3 +50,15 @@ def test_get_time(monkeypatch):
                                  microsecond=388395)
     assert result == expected
 
+
+def test_get_day_of_week(monkeypatch):
+
+    class fake_weekday(object):
+
+        def weekday(self):
+            return 6
+
+    parser = cronparse.CronParse()
+    result = parser.get_day_of_week(date=fake_weekday())
+    assert result == 0
+
