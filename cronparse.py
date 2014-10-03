@@ -242,12 +242,15 @@ class CronParse(object):
             if not valid_day or not valid_month or not valid_day_of_week:
                 # Increment by day and try again
                 dt = dt + datetime.timedelta(days=1)
-                dt = dt - datetime.timedelta(minutes=dt.minute)
-                dt = dt - datetime.timedelta(hours=dt.hour)
+                if dt.minute != 0:
+                    dt = dt - datetime.timedelta(minutes=dt.minute)
+                if dt.hour != 0:
+                    dt = dt - datetime.timedelta(hours=dt.hour)
             elif not valid_hour:
                 # Increment by an hour and try again
                 dt = dt + datetime.timedelta(hours=1)
-                dt = dt - datetime.timedelta(minutes=dt.minute)
+                if dt.minute != 0:
+                    dt = dt - datetime.timedelta(minutes=dt.minute)
             elif not valid_minute:
                 # Increment by one minute
                 dt = dt + datetime.timedelta(minutes=1)
