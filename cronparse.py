@@ -89,59 +89,6 @@ class CronParse(object):
 
         return next_run
 
-    def handle_non_day(self):
-        """
-        Handle cases where we don't have to worry about day and month.
-
-        """
-
-        now = self.get_time()
-        new_time = None
-        if self.crontab_times['hour'] == '*':
-            if self.crontab_times['minute'] == '*':
-                # Return time for next minute
-                new_time = now + datetime.timedelta(minutes=1)
-            elif self.crontab_times['minute'] is None:
-                cycle_minute = self.crontab_times['minute']
-                if cycle_minute is None:
-                    # Then we've got a problem
-                    raise ValueError('No minute value')
-                minute = now.minute
-                hour = now.hour
-                for i in xrange(0, cycle_minute):
-                    if (minute + i) % cycle_minute == 0:
-                        minute += i
-                        break
-                if minute > 60:
-                    # Gone too far: restart at 0
-                    minute = 0
-                    hour += 1
-                new_time = datetime.datetime(year=now.year,
-                                             month=now.month,
-                                             day=now.day,
-                                             hour=hour, minute=minute)
-            else:
-                minute = self.crontab_times['minute']
-                new_time = datetime.datetime(year=now.year,
-                                             month=now.month,
-                                             day=now.day,
-                                             hour=day.hour,
-                                             minute=minute)
-                if new_time > now:
-                    new_time = datetime.datetime(year=now.year,
-                                                 month=now.month,
-                                                 day=now.day,
-                                                 hour=day.hour+1,
-                                                 minute=minute)
-        else:
-            # Hours matter.
-            if self.crontab_times['hour'] is None:
-                pass
-            else:
-                hour = self.crontab_times['hour'] = hour
-
-        return new_time
-
     def pick_day(self, now):
         """
         Get the hours from pick_hour and then shove it out the door with
