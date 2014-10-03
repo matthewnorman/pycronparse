@@ -203,7 +203,20 @@ class CronParse(object):
                 return True
             return False
         return False  # I don't know how you would get here.
-            
+
+
+    def validate_dow(self, dt):
+        """
+        Validate the day of the week
+
+        """
+        if self.crontab_times['dayofweek'] == '*':
+            return True
+        else:
+            weekday = int(self.crontab_times['dayofweek'])
+            if weekday == self.get_day_of_week(date=dt):
+                return True
+            return False
 
 
     def brute_next(self, now):

@@ -73,6 +73,18 @@ def test_validate_dt_part():
     assert not parser.validate_dt_part(dt=dt, component='minute')
 
 
+def test_validate_dow():
+    dt = datetime.datetime(year=2014, month=10, day=3, hour=8, minute=10)
+    parser = cronparse.CronParse()
+    parser.set_cron(input_cron='* * * * 5')
+
+    assert parser.validate_dow(dt=dt)
+
+    parser.set_cron(input_cron='* * * * 4')
+    assert not parser.validate_dow(dt=dt)
+                    
+
+
 def test_pick_minute(monkeypatch):
 
     now = datetime.datetime(year=2014, month=8, day=8, hour=8, minute=20)
