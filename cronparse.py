@@ -133,7 +133,8 @@ class CronParse(object):
                                          hour=hour, minute=minute_dt.minute)
             if new_time < minute_dt:
                 temp_time = new_time + datetime.timedelta(days=1)
-                temp_time = temp_time - datetime.timedelta(minutes=minute_dt.minute)
+                min_holder = minute_dt.minute
+                temp_time = temp_time - datetime.timedelta(minutes=min_holder)
                 new_time = self.pick_minute(now=temp_time)
         return new_time
 
