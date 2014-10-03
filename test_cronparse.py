@@ -30,7 +30,7 @@ def test_input_cron():
     parser.set_cron(input_cron = '*/10 * * * *')
     assert parser.crontab_times['minute'] is None
     assert parser.crontab_times['hour'] == '*'
-    assert parser.crontab_cycle['minute'] == '10'
+    assert parser.crontab_cycle['minute'] == 10
 
 
 def test_get_time(monkeypatch):
@@ -62,3 +62,28 @@ def test_get_day_of_week(monkeypatch):
     result = parser.get_day_of_week(date=fake_weekday())
     assert result == 0
 
+def test_pick_minute(monkeypatch):
+
+    now = datetime.datetime(year=2014, month=8, day=8, hour=8, minute=20)
+    parser = cronparse.CronParse()
+
+    # Should return right now
+    parser.set_cron(input_cron='* * * * *')
+    result = parser.pick_minute(now=now)
+    assert result == now
+
+    # Should return now
+    parser.set_cron(input_cron = '20 * * * *')
+    result = parser.pick_minute(now=now)
+    assert result == now
+
+    # Since the tenth minute has already passed, should go to the next hour
+    parser.set_cron(input_cron = '10 * * * *')
+    result = parser.pick_minute(now=now)
+    assert result == datetime.datetime(year=2014, month=8, day=8, hour=9,
+                                       minute=10)
+
+    parser.set_cron(input_cron = '*/15 * * * *')
+    result = parser.pick_minute(now=now)
+    assert result == datetime.datetime(year=2014, month=8, day=8, hour=8,
+                                       minute=30)

@@ -36,7 +36,7 @@ class CronParse(object):
             if x.startswith('*/'):
                 time_list.append(None)
                 # Then take the value only (we don't care about the rest)
-                cycle_list.append(x.split('/')[1])
+                cycle_list.append(int(x.split('/')[1]))
             else:
                 if x is not '*' and not x.isdigit():
                     raise ValueError('Invalid value %s' % x)
@@ -137,16 +137,16 @@ class CronParse(object):
         """
         new_time = None
         if self.crontab_times['minute'] == '*':
-            # Return time for next minute
-            new_time = now + datetime.timedelta(minutes=1)
+            # Return now
+            new_time = now
         elif self.crontab_times['minute'] is None:
-            cycle_minute = self.crontab_times['minute']
+            cycle_minute = self.crontab_cycle['minute']
             if cycle_minute is None:
                 # Then we've got a problem
                 raise ValueError('No minute value')
             minute_increment = 0
             for i in xrange(0, cycle_minute):
-                if (minute + i) % cycle_minute == 0:
+                if (now.minute + i) % cycle_minute == 0:
                     minute_increment = i
                     break
             new_time = datetime.datetime(year=now.year,
@@ -155,13 +155,13 @@ class CronParse(object):
                                          hour=now.hour, minute=now.minute)
             new_time = new_time + datetime.timedelta(minutes=minute_increment)
         else:
-            minute = self.crontab_times['minute']
+            minute = int(self.crontab_times['minute'])
             new_time = datetime.datetime(year=now.year,
                                          month=now.month,
                                          day=now.day,
-                                         hour=day.hour,
+                                         hour=now.hour,
                                          minute=minute)
-            if new_time > now:
+            if new_time < now:
                 new_time = datetime.datetime(year=now.year,
                                              month=now.month,
                                              day=now.day,
