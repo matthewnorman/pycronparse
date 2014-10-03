@@ -8,6 +8,14 @@ def str_test(tester):
         return True
     return False
 
+
+class CronParseException(Exception):
+    """
+    Raise this when you're in trouble
+
+    """
+
+
 class CronParse(object):
 
     def __init__(self, input_cron=None, timezone=None):
@@ -224,4 +232,31 @@ class CronParse(object):
         Brute force this - simply iterate through all possible times.
 
         """
+        dt = now
+        while True:
+            valid_day = self.validate_dt_part(dt=dt, component='day')
+            valid_month = self.validate_dt_part(dt=dt, component='month')
+            valid_hour = self.validate_dt_part(dt=dt, component='hour')
+            valid_minute = self.validate_dt_part(dt=dt, component='minute')
+            valid_day_of_week = self.validate_dow(dt=dt)
+            if not valid_day or not valid_month or not valid_day_of_week:
+                # Increment by day and try again
+                dt = dt + datetime.timedelta(days=1)
+                dt = dt - datetime.timedelta(minutes=dt.minute)
+                dt = dt - datetime.timedelta(hours=dt.hour)
+            elif not valid_hour:
+                # Increment by an hour and try again
+                dt = dt + datetime.timedelta(hours=1)
+                dt = dt - datetime.timedelta(minutes=dt.minute)
+            elif not valid_minute:
+                # Increment by one minute
+                dt = dt + datetime.timedelta(minutes=1)
+            elif dt.year - now.year > 100:
+                # There are no hundred year cycles
+                raise CronParseException('Stuck in infinite loop')
+            else:
+                break
+        # At the end
+        return dt
+                
         

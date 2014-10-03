@@ -1,3 +1,4 @@
+import time
 import pytest
 import datetime
 
@@ -82,8 +83,51 @@ def test_validate_dow():
 
     parser.set_cron(input_cron='* * * * 4')
     assert not parser.validate_dow(dt=dt)
-                    
 
+
+def test_brute_next():
+    """
+    Can we just brute force this thing?
+
+    """
+    dt = datetime.datetime(year=2014, month=8, day=8, hour=8, minute=8)
+    parser = cronparse.CronParse()
+
+    parser.set_cron(input_cron='* * * * *')
+    assert parser.brute_next(now=dt) == dt
+
+    parser.set_cron(input_cron='10 * * * *')
+    assert parser.brute_next(now=dt) == datetime.datetime(year=2014, month=8,
+                                                          day=8, hour=8,
+                                                          minute=10)
+
+    parser.set_cron(input_cron='* 10 * * *')
+    assert parser.brute_next(now=dt) == datetime.datetime(year=2014, month=8,
+                                                          day=8, hour=10,
+                                                          minute=0)
+
+    parser.set_cron(input_cron='5 * * * *')
+    assert parser.brute_next(now=dt) == datetime.datetime(year=2014, month=8,
+                                                          day=8, hour=9,
+                                                          minute=5)
+
+    parser.set_cron(input_cron='*/10 * * * *')
+    assert parser.brute_next(now=dt) == datetime.datetime(year=2014, month=8,
+                                                          day=8, hour=8,
+                                                          minute=10)
+
+    parser.set_cron(input_cron='5 */10 * * *')
+    assert parser.brute_next(now=dt) == datetime.datetime(year=2014, month=8,
+                                                          day=8, hour=10,
+                                                          minute=5)
+
+    # Longest test I know of
+    parser.set_cron(input_cron='* * 29 2 3')
+    start = time.time()
+    result = parser.brute_next(now=dt)
+    print 'Timing test took %f' % (time.time() - start)
+    assert result == datetime.datetime(year=2040, month=2, day=29,
+                                       hour=0, minute=0)
 
 def test_pick_minute(monkeypatch):
 
