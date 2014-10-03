@@ -62,6 +62,17 @@ def test_get_day_of_week(monkeypatch):
     result = parser.get_day_of_week(date=fake_weekday())
     assert result == 0
 
+def test_validate_dt_part():
+    dt = datetime.datetime(year=2014, month=8, day=8, hour=8, minute=10)
+    parser = cronparse.CronParse()
+    parser.set_cron(input_cron='15 */2 8 * *')
+
+    assert parser.validate_dt_part(dt=dt, component='hour')
+    assert parser.validate_dt_part(dt=dt, component='day')
+    assert parser.validate_dt_part(dt=dt, component='month')
+    assert not parser.validate_dt_part(dt=dt, component='minute')
+
+
 def test_pick_minute(monkeypatch):
 
     now = datetime.datetime(year=2014, month=8, day=8, hour=8, minute=20)

@@ -1,7 +1,7 @@
 import time
 import datetime
 
-CRON_ORDER = ['minute', 'hour', 'dayofmonth', 'month', 'dayofweek']
+CRON_ORDER = ['minute', 'hour', 'day', 'month', 'dayofweek']
 
 def str_test(tester):
     if isinstance(tester, str) or isinstance(tester, unicode):
@@ -178,3 +178,37 @@ class CronParse(object):
                 new_time = new_time + datetime.timedelta(hours=1)
 
         return new_time
+
+
+    def validate_dt_part(self, dt, component):
+        """
+        Validate each component of the dt (besides the day of the week)
+        because they all work in more or less the same way.
+
+        """
+        if self.crontab_times[component] == '*':
+            return True
+        elif self.crontab_times[component] is None:
+            cycle_period = self.crontab_cycle.get(component)
+            if cycle_period is None:
+                logger.error('Got an unexpected None in %s' % component)
+                return False
+            if getattr(dt, component) % cycle_period != 0:
+                return False
+            else:
+                return True
+        else:
+            fixed_time = int(self.crontab_times[component])
+            if getattr(dt, component) == fixed_time:
+                return True
+            return False
+        return False  # I don't know how you would get here.
+            
+
+
+    def brute_next(self, now):
+        """
+        Brute force this - simply iterate through all possible times.
+
+        """
+        
