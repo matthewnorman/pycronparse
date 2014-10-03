@@ -113,21 +113,28 @@ class CronParse(object):
         if self.crontab_times['hour'] == '*':
             return minute_dt
         elif self.crontab_times['hour'] is None:
-            cycle_hour = self.crontab_cycles['hour']
+            cycle_hour = self.crontab_cycle['hour']
             hour_increment = 0
             for i in xrange(0, cycle_hour):
-                if (current_hour + i) % cycle_hour == 0:
+                if (now.hour + i) % cycle_hour == 0:
                     hour_increment = i
                     break
-            new_time = minute_dt + datetime.timedelta(hours=hour_increment)
+            temp_time = minute_dt + datetime.timedelta(hours=hour_increment)
+            temp_time = temp_time - datetime.timedelta(minutes=minute_dt.minute)
+            new_time = self.pick_minute(now=temp_time)
+            if new_time < now:
+                # This happens when this hour qualifies
+                new_time = self.pick_hour(now=now + datetime.timedelta(hours=1))
         else:
-            hour = self.crontab_times['hour']
+            hour = int(self.crontab_times['hour'])
             new_time = datetime.datetime(year=minute_dt.year,
                                          month=minute_dt.month,
                                          day=minute_dt.day,
                                          hour=hour, minute=minute_dt.minute)
             if new_time < minute_dt:
-                new_time = new_time + datetime.timedelta(days=1)
+                temp_time = new_time + datetime.timedelta(days=1)
+                temp_time = temp_time - datetime.timedelta(minutes=minute_dt.minute)
+                new_time = self.pick_minute(now=temp_time)
         return new_time
 
     def pick_minute(self, now):

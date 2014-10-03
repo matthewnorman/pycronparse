@@ -87,3 +87,38 @@ def test_pick_minute(monkeypatch):
     result = parser.pick_minute(now=now)
     assert result == datetime.datetime(year=2014, month=8, day=8, hour=8,
                                        minute=30)
+
+
+def test_pick_hour():
+    """
+    Grab an hour
+
+    """
+
+    now = datetime.datetime(year=2014, month=8, day=8, hour=8, minute=20)
+    parser = cronparse.CronParse()
+
+    # Should return right now
+    parser.set_cron(input_cron='* * * * *')
+    result = parser.pick_hour(now=now)
+    assert result == now
+
+    # Should return right now
+    parser.set_cron(input_cron='* 8 * * *')
+    result = parser.pick_hour(now=now)
+    assert result == now
+
+    # Should return sometime tomorrow
+    parser.set_cron(input_cron='* 7 * * *')
+    result = parser.pick_hour(now=now)
+    assert result == datetime.datetime(year=2014, month=8, day=9,
+                                       hour=7, minute=0)
+
+    # Should return next hour
+    parser.set_cron(input_cron='* */2 * * *')
+    result = parser.pick_hour(now=now)
+    assert result == datetime.datetime(year=2014, month=8, day=8,
+                                       hour=10, minute=0)
+
+
+
