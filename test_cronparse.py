@@ -132,12 +132,12 @@ def test_brute_next():
                                                           minute=1)
 
     # Longest test I know of
-    parser.set_cron(input_cron='* * 29 2 3')
+    parser.set_cron(input_cron='59 23 29 2 *')
     start = time.time()
     result = parser.brute_next(now=dt)
     print 'Timing test took %f' % (time.time() - start)
-    assert result == datetime.datetime(year=2040, month=2, day=29,
-                                       hour=0, minute=0)
+    assert result == datetime.datetime(year=2016, month=2, day=29,
+                                       hour=23, minute=59)
 
 def test_pick_minute(monkeypatch):
 
