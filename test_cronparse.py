@@ -131,6 +131,12 @@ def test_brute_next():
                                                           day=13, hour=2,
                                                           minute=1)
 
+    # Should use dow instead of day as that is closer
+    parser.set_cron(input_cron='1 2 22 * 3')
+    assert parser.brute_next(now=dt) == datetime.datetime(year=2014, month=8,
+                                                          day=13, hour=2,
+                                                          minute=1)
+
     # Longest test I know of
     parser.set_cron(input_cron='59 23 29 2 *')
     start = time.time()
