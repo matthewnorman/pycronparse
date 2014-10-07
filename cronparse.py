@@ -226,6 +226,20 @@ class CronParse(object):
                 return True
             return False
 
+    def validate_day(self, dt):
+        """
+        Validate the day as one method. This is because cron uses an OR
+        when both day of month and day of week are specified.
+
+        """
+        if self.crontab_times['dayofweek'] == '*':
+            return self.validate_dt_part(dt=dt, component='day')
+        elif self.crontab_times['day'] == '*':
+            return self.validate_dow(dt=dt)
+        else:
+            return (self.validate_dt_part(dt=dt, component='day') or
+                    self.validate_dow(dt=dt))
+
 
     def brute_next(self, now):
         """
@@ -234,12 +248,11 @@ class CronParse(object):
         """
         dt = now
         while True:
-            valid_day = self.validate_dt_part(dt=dt, component='day')
+            valid_day = self.validate_day(dt=dt)
             valid_month = self.validate_dt_part(dt=dt, component='month')
             valid_hour = self.validate_dt_part(dt=dt, component='hour')
             valid_minute = self.validate_dt_part(dt=dt, component='minute')
-            valid_day_of_week = self.validate_dow(dt=dt)
-            if not valid_day or not valid_month or not valid_day_of_week:
+            if not valid_day or not valid_month:
                 # Increment by day and try again
                 dt = dt + datetime.timedelta(days=1)
                 if dt.minute != 0:
