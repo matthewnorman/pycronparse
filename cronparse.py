@@ -252,7 +252,14 @@ class CronParse(object):
             valid_month = self.validate_dt_part(dt=dt, component='month')
             valid_hour = self.validate_dt_part(dt=dt, component='hour')
             valid_minute = self.validate_dt_part(dt=dt, component='minute')
-            if not valid_day or not valid_month:
+            if not valid_month:
+                if dt.month > 11:
+                    dt = datetime.datetime(year=dt.year+1, month=1,
+                                           day=1, hour=0, minute=0)
+                else:
+                    dt = datetime.datetime(year=dt.year, month=dt.month+1,
+                                           day=1, hour=0, minute=0)
+            if not valid_day:
                 # Increment by day and try again
                 dt = dt + datetime.timedelta(days=1)
                 if dt.minute != 0:
