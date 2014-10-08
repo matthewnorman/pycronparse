@@ -17,21 +17,16 @@ def test_input_cron():
         parser.set_cron(input_cron='invalid string')
     
     parser.set_cron(input_cron = '* * * * *')
-    for x in  parser.crontab_times.values():
+    for x in  parser.cron_parts.values():
         assert x == '*'
-    for x in parser.crontab_cycle.values():
-        assert x is None
 
     parser.set_cron(input_cron = '10 * * * *')
-    assert parser.crontab_times['minute'] == '10'
-    assert parser.crontab_times['hour'] == '*'
-    for x in parser.crontab_cycle.values():
-        assert x is None
+    assert parser.cron_parts['minute'] == '10'
+    assert parser.cron_parts['hour'] == '*'
 
     parser.set_cron(input_cron = '*/10 * * * *')
-    assert parser.crontab_times['minute'] is None
-    assert parser.crontab_times['hour'] == '*'
-    assert parser.crontab_cycle['minute'] == 10
+    assert parser.cron_parts['minute'] == '*/10'
+    assert parser.cron_parts['hour'] == '*'
 
 
 def test_get_time(monkeypatch):
@@ -151,7 +146,7 @@ def test_brute_next():
     assert result == datetime.datetime(year=2016, month=2, day=29,
                                        hour=23, minute=59)
 
-def test_pick_minute(monkeypatch):
+def deprecated_test_pick_minute(monkeypatch):
 
     now = datetime.datetime(year=2014, month=8, day=8, hour=8, minute=20)
     parser = cronparse.CronParse()
@@ -178,7 +173,7 @@ def test_pick_minute(monkeypatch):
                                        minute=30)
 
 
-def test_pick_hour():
+def deprecated_test_pick_hour():
     """
     Grab an hour
 
