@@ -132,8 +132,14 @@ def test_brute_next():
                                                           day=13, hour=2,
                                                           minute=1)
 
-    # Save this for later, when I can do a list properly
-    parser.set_cron(input_cron='2 2 22 * 3')
+    # Lists
+    parser.set_cron(input_cron='2,3,4,5 2 22 * 3')
+    assert parser.brute_next(now=dt) == datetime.datetime(year=2014, month=8,
+                                                          day=13, hour=2,
+                                                          minute=2)
+
+    # Range
+    parser.set_cron(input_cron='2-5 2 22 * 3')
     assert parser.brute_next(now=dt) == datetime.datetime(year=2014, month=8,
                                                           day=13, hour=2,
                                                           minute=2)
