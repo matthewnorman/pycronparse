@@ -28,6 +28,12 @@ def test_input_cron():
     assert parser.cron_parts['minute'] == '*/10'
     assert parser.cron_parts['hour'] == '*'
 
+    with pytest.raises(ValueError):
+        parser.set_cron(input_cron='*/70 * * * *')
+
+    with pytest.raises(ValueError):
+        parser.set_cron(input_cron='* 24 * * *')
+
 
 def test_get_time(monkeypatch):
     """
@@ -151,6 +157,20 @@ def test_brute_next():
     print 'Timing test took %f' % (time.time() - start)
     assert result == datetime.datetime(year=2016, month=2, day=29,
                                        hour=23, minute=59)
+
+
+def test_profile():
+    import cProfile, pstats
+    parser = cronparse.CronParse()
+    parser.set_cron(input_cron='1-59/59 14-23/23 29 2 *')
+    def run_test(parser, n):
+        for x in xrange(n):
+            dt = datetime.datetime(year=2014, month=8, day=8, hour=8, minute=8)
+            parser.brute_next(now=dt)
+    
+    cProfile.runctx("run_test(parser=parser, n=1000)", globals(), locals())
+
+
 
 def deprecated_test_pick_minute(monkeypatch):
 
