@@ -137,8 +137,14 @@ def test_brute_next():
                                                           day=13, hour=2,
                                                           minute=1)
 
+    # Save this for later, when I can do a list properly
+    parser.set_cron(input_cron='2 2 22 * 3')
+    assert parser.brute_next(now=dt) == datetime.datetime(year=2014, month=8,
+                                                          day=13, hour=2,
+                                                          minute=2)
+
     # Longest test I know of
-    parser.set_cron(input_cron='59 23 29 2 *')
+    parser.set_cron(input_cron='59 14-23/23 29 2 *')
     start = time.time()
     result = parser.brute_next(now=dt)
     print 'Timing test took %f' % (time.time() - start)
