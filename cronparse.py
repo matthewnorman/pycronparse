@@ -1,7 +1,10 @@
+import re
 import time
 import datetime
 
 CRON_ORDER = ['minute', 'hour', 'day', 'month', 'dayofweek']
+BOUNDS = {'minute': (0, 59), 'hour': (0, 23), 'day': (1, 31),
+          'month': (1, 12), 'dayofweek': (1, 7)}
 
 def str_test(tester):
     if isinstance(tester, str) or isinstance(tester, unicode):
@@ -41,6 +44,12 @@ class CronParse(object):
             msg = 'Must have five different components for cron format.'
             raise ValueError(msg)
         for key, value in zip(CRON_ORDER, split_crons):
+            all_ints = [int(x) for x in re.findall(r"[\d]+", value)]
+            bounds = BOUNDS[key]
+            for num in all_ints:
+                if num < bounds[0] or num > bounds[1]:
+                    msg = 'Invalid value {} for {}'.format(num, key)
+                    raise ValueError(msg)
             self.cron_parts[key] = value
         
     def get_time(self):
