@@ -23,6 +23,7 @@ class CronParse(object):
         self.crontab_times = {}
         self.crontab_cycle = {}
         self.ranges = {}
+        self.cron_parts = {}
         if input_cron is not None:
             self.set_cron(input_cron=input_cron)
 
@@ -39,6 +40,8 @@ class CronParse(object):
         if not len(split_crons) == 5:
             msg = 'Must have five different components for cron format.'
             raise ValueError(msg)
+        for key, value in zip(CRON_ORDER, split_crons):
+            self.cron_parts[key] = value
         time_list = []
         cycle_list = []
         range_list = []
@@ -210,38 +213,64 @@ class CronParse(object):
 
         """
         time_value = getattr(dt, component)
-        if self.crontab_times[component] == '*':
+        if self.cron_parts[component] == '*':
+            # Always true
             return True
-        elif self.crontab_times[component] is None:
-            cycle_period = self.crontab_cycle.get(component)
-            if self.ranges[component] is not None:
-                # If there is no cycle time, this should handle things
-                valid_range = False
-                for x in self.ranges[component]:
-                    if time_value >= x[0] and time_value <= x[1]:
-                        valid_range = True
-                        break
-                if not valid_range:
-                    # We are outside all ranges
-                    return False
-                if cycle_period is None and valid_range:
-                    # Then we have nothing to cycle over and we can just
-                    # return true and end.
-                    return True                
+        for x in self.cron_parts[component].split(','):
+            # Split into a list of individual parts
+            if x.isdigit():
+                # Then it's simple
+                if int(x) == time_value:
+                    return True
+                continue
+            if '-' in x:
+                # This is a range. Extract the range part and handle it.
+                range_min, range_max = x.split('/')[0].split('-')
+                
+                if time_value < int(range_min) or time_value > int(range_max):
+                    continue
+            if '/' in x:
+                cycle_value = x.split('/')[1]
+                if not cycle_value.isdigit():
+                    raise ValueError('Invalid timevalue %s' % x)
+                if time_value % int(cycle_value) == 0:
+                    return True
+        return False
+                            
 
-            if cycle_period is None:
-                logger.error('Got an unexpected None in %s' % component)
-                return False
-            if time_value % cycle_period != 0:
-                return False
-            else:
-                return True
-        else:
-            fixed_time = int(self.crontab_times[component])
-            if time_value == fixed_time:
-                return True
-            return False
-        return False  # I don't know how you would get here.
+
+        #if self.crontab_times[component] == '*':
+        #    return True
+        #elif self.crontab_times[component] is None:
+        #    cycle_period = self.crontab_cycle.get(component)
+        #    if self.ranges[component] is not None:
+        #        # If there is no cycle time, this should handle things
+        #        valid_range = False
+        #        for x in self.ranges[component]:
+        #            if time_value >= x[0] and time_value <= x[1]:
+        #                valid_range = True
+        #                break
+        #        if not valid_range:
+        #            # We are outside all ranges
+        #            return False
+        #        if cycle_period is None and valid_range:
+        #            # Then we have nothing to cycle over and we can just
+        #            # return true and end.
+        #            return True                
+        #
+        #    if cycle_period is None:
+        #        logger.error('Got an unexpected None in %s' % component)
+        #        return False
+        #    if time_value % cycle_period != 0:
+        #        return False
+        #    else:
+        #        return True
+        #else:
+        #    fixed_time = int(self.crontab_times[component])
+        #    if time_value == fixed_time:
+        #        return True
+        #    return False
+        #return False  # I don't know how you would get here.
 
 
     def validate_dow(self, dt):
