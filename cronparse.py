@@ -85,9 +85,10 @@ class CronParse(object):
             if '-' in x:
                 # This is a range. Extract the range part and handle it.
                 range_min, range_max = x.split('/')[0].split('-')
-                
                 if time_value < int(range_min) or time_value > int(range_max):
                     continue
+                if not '/' in x:
+                    return True
             if '/' in x:
                 cycle_value = x.split('/')[1]
                 if not cycle_value.isdigit():
