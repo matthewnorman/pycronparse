@@ -42,37 +42,6 @@ class CronParse(object):
             raise ValueError(msg)
         for key, value in zip(CRON_ORDER, split_crons):
             self.cron_parts[key] = value
-        time_list = []
-        cycle_list = []
-        range_list = []
-        for x in split_crons:
-            if '/' in x:
-                time_list.append(None)
-                numer, denom = x.split('/')
-                if not denom.isdigit():
-                    raise ValueError('Non numeric denominator %s' % denom)
-                cycle_list.append(int(denom))
-                if '-' in numer:
-                    range_list.append([numer.split('-')])
-                
-                
-            else:
-                if '-' in x:
-                    range_list.append([(y.split('-')[0],
-                                        y.split('-')[1])
-                                       for y in x.split(',')])
-                if x is not '*' and not x.isdigit():
-                    raise ValueError('Invalid value %s' % x)
-                time_list.append(x)
-                cycle_list.append(None)
-                range_list.append(None)
-
-        for name, timemark, cycle, range in zip(CRON_ORDER, time_list,
-                                                cycle_list, range_list):
-            self.crontab_times[name] = timemark
-            self.crontab_cycle[name] = cycle
-            self.ranges[name] = range
-
         
     def get_time(self):
         """
@@ -236,52 +205,16 @@ class CronParse(object):
                 if time_value % int(cycle_value) == 0:
                     return True
         return False
-                            
-
-
-        #if self.crontab_times[component] == '*':
-        #    return True
-        #elif self.crontab_times[component] is None:
-        #    cycle_period = self.crontab_cycle.get(component)
-        #    if self.ranges[component] is not None:
-        #        # If there is no cycle time, this should handle things
-        #        valid_range = False
-        #        for x in self.ranges[component]:
-        #            if time_value >= x[0] and time_value <= x[1]:
-        #                valid_range = True
-        #                break
-        #        if not valid_range:
-        #            # We are outside all ranges
-        #            return False
-        #        if cycle_period is None and valid_range:
-        #            # Then we have nothing to cycle over and we can just
-        #            # return true and end.
-        #            return True                
-        #
-        #    if cycle_period is None:
-        #        logger.error('Got an unexpected None in %s' % component)
-        #        return False
-        #    if time_value % cycle_period != 0:
-        #        return False
-        #    else:
-        #        return True
-        #else:
-        #    fixed_time = int(self.crontab_times[component])
-        #    if time_value == fixed_time:
-        #        return True
-        #    return False
-        #return False  # I don't know how you would get here.
-
 
     def validate_dow(self, dt):
         """
         Validate the day of the week
 
         """
-        if self.crontab_times['dayofweek'] == '*':
+        if self.cron_parts['dayofweek'] == '*':
             return True
         else:
-            weekday = int(self.crontab_times['dayofweek'])
+            weekday = int(self.cron_parts['dayofweek'])
             if weekday == self.get_day_of_week(date=dt):
                 return True
             return False
@@ -292,9 +225,9 @@ class CronParse(object):
         when both day of month and day of week are specified.
 
         """
-        if self.crontab_times['dayofweek'] == '*':
+        if self.cron_parts['dayofweek'] == '*':
             return self.validate_dt_part(dt=dt, component='day')
-        elif self.crontab_times['day'] == '*':
+        elif self.cron_parts['day'] == '*':
             return self.validate_dow(dt=dt)
         else:
             return (self.validate_dt_part(dt=dt, component='day') or
